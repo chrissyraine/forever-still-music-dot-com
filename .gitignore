@@ -1,0 +1,3 @@
+# Audio masters stay local — the web player uses the MP3s in /audio.
+# WAV files are huge (50-76MB each) and break Vercel/static deploys.
+*.wav

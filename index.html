@@ -37,6 +37,7 @@
       --bg-soft:    #1a0d14;
       --bg-warm:    #241218;
       --gold:       #C8A96A;
+      --gold-dim:   rgba(200, 169, 106, 0.35);
       --text:       #f0ebe4;
       --text-muted: #9c8c82;
       --text-soft:  #cbbfb6;
@@ -61,13 +62,13 @@
 
     .container { width: 100%; max-width: 900px; margin: 0 auto; padding: 0 32px; }
 
-    /* Nav */
+    /* ── Nav ── */
     .nav { padding: 28px 0; display: flex; align-items: center; justify-content: space-between; }
     .nav__logo { font-family: var(--font-script); font-size: 1.7rem; color: var(--gold); }
     .nav__link { font-family: var(--font-sans); font-size: 10px; font-weight: 500; letter-spacing: 0.2em; text-transform: uppercase; color: var(--text-muted); border: 1px solid var(--rule); padding: 8px 18px; transition: color 0.2s, border-color 0.2s; }
     .nav__link:hover { color: var(--gold); border-color: var(--gold); }
 
-    /* Hero */
+    /* ── Hero ── */
     .hero { padding: 60px 0 56px; text-align: center; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); margin-bottom: 64px; position: relative; }
     .hero::before { content: ''; position: absolute; inset: 0; background: radial-gradient(ellipse at 50% 0%, rgba(200,169,106,0.07) 0%, transparent 65%); pointer-events: none; }
     .hero__eyebrow { font-family: var(--font-sans); font-size: 10px; font-weight: 500; letter-spacing: 0.28em; text-transform: uppercase; color: var(--gold); opacity: 0.75; display: block; margin-bottom: 20px; }
@@ -78,22 +79,261 @@
     .hero__stat-label { font-family: var(--font-sans); font-size: 9px; font-weight: 500; letter-spacing: 0.22em; text-transform: uppercase; color: var(--text-muted); }
     .hero__divider { width: 1px; height: 36px; background: var(--rule); }
 
-    /* Section labels */
+    /* ── Section labels ── */
     .section-label { font-family: var(--font-sans); font-size: 10px; font-weight: 500; letter-spacing: 0.24em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 20px; display: flex; align-items: center; gap: 16px; }
     .section-label::after { content: ''; flex: 1; height: 1px; background: var(--rule); }
 
-    /* Player */
+    /* ── Full Catalog Player (SoundCloud embed) ── */
     .player-section { margin-bottom: 72px; }
     .player-wrap { border: 1px solid var(--rule); overflow: hidden; background: var(--bg-soft); }
     .player-wrap iframe { display: block; width: 100%; }
 
-    /* Featured */
-    .featured-section { margin-bottom: 72px; }
-    .featured-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-    .featured-track { border: 1px solid var(--rule); background: var(--bg-soft); overflow: hidden; }
-    .featured-track iframe { display: block; width: 100%; }
+    /* ══════════════════════════════════════════════
+       CUSTOM AUDIO PLAYER
+       ══════════════════════════════════════════════ */
+    .now-playing-section { margin-bottom: 72px; }
 
-    /* CTA */
+    .player-card {
+      border: 1px solid var(--rule);
+      background: var(--bg-soft);
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Sound wave visualization */
+    .sound-wave {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      height: 80px;
+      padding: 20px 24px 12px;
+      position: relative;
+      overflow: hidden;
+    }
+    .sound-wave::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 100%, rgba(200,169,106,0.04) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .sound-wave__bar {
+      width: 3px;
+      min-height: 4px;
+      max-height: 56px;
+      height: 4px;
+      background: var(--gold);
+      border-radius: 2px;
+      opacity: 0.35;
+      transition: height 0.4s cubic-bezier(0.4, 0, 0.2, 1),
+                  opacity 0.4s ease;
+    }
+
+    /* Playing state — bars animate */
+    .sound-wave--playing .sound-wave__bar {
+      opacity: 1;
+      animation: wave-pulse var(--duration) ease-in-out infinite alternate;
+      animation-delay: var(--delay);
+    }
+
+    @keyframes wave-pulse {
+      0%   { height: var(--min-h); opacity: 0.6; }
+      50%  { height: var(--max-h); opacity: 1; }
+      100% { height: var(--min-h); opacity: 0.6; }
+    }
+
+    /* Paused state — bars settle to resting height */
+    .sound-wave--paused .sound-wave__bar {
+      height: 4px;
+      opacity: 0.35;
+      animation: none;
+      transition: height 0.5s cubic-bezier(0.4, 0, 0.2, 1),
+                  opacity 0.5s ease;
+    }
+
+    /* ── Track Info ── */
+    .player-info {
+      padding: 0 24px;
+      margin-bottom: 4px;
+    }
+    .player-track-name {
+      font-family: var(--font-display);
+      font-size: clamp(1.3rem, 3vw, 1.7rem);
+      font-weight: 300;
+      font-style: italic;
+      color: var(--text);
+      display: block;
+      line-height: 1.3;
+    }
+    .player-artist-name {
+      font-family: var(--font-sans);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      display: block;
+      margin-top: 2px;
+    }
+
+    /* ── Controls ── */
+    .player-controls {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      padding: 16px 24px;
+    }
+
+    .play-btn {
+      flex-shrink: 0;
+      width: 44px;
+      height: 44px;
+      border: 1px solid var(--gold);
+      border-radius: 50%;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s, border-color 0.2s;
+      position: relative;
+    }
+    .play-btn:hover {
+      background: rgba(200, 169, 106, 0.1);
+    }
+    .play-btn:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: 2px;
+    }
+    .play-btn svg {
+      width: 16px;
+      height: 16px;
+      fill: var(--gold);
+      transition: fill 0.2s;
+    }
+
+    /* Progress bar */
+    .progress-wrap {
+      flex: 1;
+      height: 4px;
+      background: rgba(200, 169, 106, 0.12);
+      border-radius: 2px;
+      cursor: pointer;
+      position: relative;
+      overflow: hidden;
+    }
+    .progress-wrap:hover { height: 6px; }
+    .progress-fill {
+      height: 100%;
+      background: var(--gold);
+      border-radius: 2px;
+      width: 0%;
+      transition: width 0.1s linear;
+      position: relative;
+    }
+    .progress-fill::after {
+      content: '';
+      position: absolute;
+      right: -5px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 10px;
+      height: 10px;
+      background: var(--gold);
+      border-radius: 50%;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .progress-wrap:hover .progress-fill::after {
+      opacity: 1;
+    }
+
+    /* Time display */
+    .time-display {
+      font-family: var(--font-sans);
+      font-size: 11px;
+      font-weight: 400;
+      color: var(--text-muted);
+      white-space: nowrap;
+      min-width: 80px;
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* ── Track List ── */
+    .track-list {
+      border-top: 1px solid var(--rule);
+    }
+    .track-item {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      width: 100%;
+      padding: 14px 24px;
+      background: transparent;
+      border: none;
+      border-bottom: 1px solid var(--rule);
+      cursor: pointer;
+      transition: background 0.2s;
+      text-align: left;
+    }
+    .track-item:last-child { border-bottom: none; }
+    .track-item:hover { background: rgba(200, 169, 106, 0.04); }
+    .track-item:focus-visible {
+      outline: 2px solid var(--gold);
+      outline-offset: -2px;
+    }
+
+    .track-item__num {
+      font-family: var(--font-sans);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.16em;
+      color: var(--text-muted);
+      min-width: 20px;
+      transition: color 0.2s;
+    }
+    .track-item__name {
+      flex: 1;
+      font-family: var(--font-display);
+      font-size: 1.05rem;
+      font-weight: 300;
+      color: var(--text-soft);
+      transition: color 0.2s;
+    }
+    .track-item__duration {
+      font-family: var(--font-sans);
+      font-size: 11px;
+      color: var(--text-muted);
+      font-variant-numeric: tabular-nums;
+    }
+
+    /* Active track highlight */
+    .track-item--active .track-item__num { color: var(--gold); }
+    .track-item--active .track-item__name { color: var(--text); }
+
+    /* Playing indicator dot */
+    .track-item__indicator {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: var(--gold);
+      opacity: 0;
+      transition: opacity 0.3s;
+      flex-shrink: 0;
+    }
+    .track-item--playing .track-item__indicator {
+      opacity: 1;
+      animation: pulse-dot 1.5s ease-in-out infinite;
+    }
+    @keyframes pulse-dot {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.4; transform: scale(0.7); }
+    }
+
+    /* ── CTA Strip (Music) ── */
     .cta-strip { border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); padding: 48px 0; margin-bottom: 64px; text-align: center; }
     .cta-strip__heading { font-family: var(--font-display); font-size: clamp(1.6rem, 3.5vw, 2.4rem); font-weight: 300; font-style: italic; color: var(--text-soft); margin-bottom: 28px; line-height: 1.4; }
     .cta-strip__heading em { font-style: normal; color: var(--text); }
@@ -105,14 +345,83 @@
     .btn--ghost { background: transparent; color: var(--text-soft); border-color: var(--rule); }
     .btn--ghost:hover { border-color: var(--gold); color: var(--gold); }
 
-    /* Streaming */
+    /* ══════════════════════════════════════════════
+       STUDIO CTA — Drives to foreverstillstudio.com
+       ══════════════════════════════════════════════ */
+    .studio-cta {
+      border: 1px solid var(--rule);
+      background: var(--bg-soft);
+      padding: 44px 32px;
+      margin-bottom: 64px;
+      text-align: center;
+      position: relative;
+      overflow: hidden;
+    }
+    .studio-cta::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: radial-gradient(ellipse at 50% 100%, rgba(200,169,106,0.05) 0%, transparent 60%);
+      pointer-events: none;
+    }
+    .studio-cta__label {
+      font-family: var(--font-sans);
+      font-size: 9px;
+      font-weight: 500;
+      letter-spacing: 0.28em;
+      text-transform: uppercase;
+      color: var(--gold);
+      opacity: 0.7;
+      display: block;
+      margin-bottom: 16px;
+    }
+    .studio-cta__heading {
+      font-family: var(--font-display);
+      font-size: clamp(1.3rem, 3vw, 1.8rem);
+      font-weight: 300;
+      font-style: italic;
+      color: var(--text-soft);
+      margin-bottom: 10px;
+      line-height: 1.4;
+    }
+    .studio-cta__heading em {
+      font-style: normal;
+      color: var(--text);
+    }
+    .studio-cta__body {
+      font-family: var(--font-sans);
+      font-size: 13px;
+      color: var(--text-muted);
+      max-width: 420px;
+      margin: 0 auto 24px;
+      line-height: 1.7;
+    }
+    .studio-cta__link {
+      display: inline-block;
+      font-family: var(--font-sans);
+      font-size: 10px;
+      font-weight: 500;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--gold);
+      border-bottom: 1px solid var(--gold-dim);
+      padding-bottom: 2px;
+      transition: border-color 0.2s, opacity 0.2s;
+      opacity: 0.85;
+    }
+    .studio-cta__link:hover {
+      opacity: 1;
+      border-color: var(--gold);
+    }
+
+    /* ── Streaming ── */
     .streaming { margin-bottom: 64px; text-align: center; }
     .streaming__label { font-family: var(--font-sans); font-size: 10px; font-weight: 500; letter-spacing: 0.24em; text-transform: uppercase; color: var(--text-muted); margin-bottom: 24px; }
     .streaming__links { display: flex; align-items: center; justify-content: center; gap: 12px; flex-wrap: wrap; }
     .streaming__link { font-family: var(--font-sans); font-size: 10px; font-weight: 500; letter-spacing: 0.16em; text-transform: uppercase; color: var(--text-muted); border: 1px solid var(--rule); padding: 9px 20px; transition: color 0.2s, border-color 0.2s; }
     .streaming__link:hover { color: var(--gold); border-color: var(--gold); }
 
-    /* Footer */
+    /* ── Footer ── */
     .footer { border-top: 1px solid var(--rule); padding: 40px 0 32px; }
     .footer__inner { display: flex; align-items: center; justify-content: space-between; gap: 20px; flex-wrap: wrap; }
     .footer__brand { font-family: var(--font-script); font-size: 1.3rem; color: var(--gold); opacity: 0.7; }
@@ -120,12 +429,18 @@
     .footer__copy a { color: var(--gold); opacity: 0.7; transition: opacity 0.2s; }
     .footer__copy a:hover { opacity: 1; }
 
-    /* Responsive */
+    /* ── Responsive ── */
     @media (max-width: 640px) {
       .container { padding: 0 20px; }
       .hero { padding: 40px 0; margin-bottom: 48px; }
-      .featured-grid { grid-template-columns: 1fr; }
       .hero__divider { display: none; }
+      .sound-wave { height: 64px; gap: 2px; padding: 16px 16px 10px; }
+      .sound-wave__bar { width: 2px; }
+      .player-info { padding: 0 16px; }
+      .player-controls { padding: 12px 16px; gap: 10px; }
+      .track-item { padding: 12px 16px; gap: 12px; }
+      .play-btn { width: 40px; height: 40px; }
+      .studio-cta { padding: 32px 20px; }
       .footer__inner { flex-direction: column; align-items: flex-start; gap: 12px; }
     }
   </style>
@@ -166,7 +481,7 @@
       </div>
     </header>
 
-    <!-- Full Catalog Player -->
+    <!-- Full Catalog Player (SoundCloud) -->
     <section class="player-section">
       <p class="section-label">Full Catalog</p>
       <div class="player-wrap">
@@ -182,28 +497,46 @@
       </div>
     </section>
 
-    <!-- Featured -->
-    <section class="featured-section">
+    <!-- Now Playing — Custom Audio Player -->
+    <section class="now-playing-section">
       <p class="section-label">Now Playing</p>
-      <div class="featured-grid">
-        <div class="featured-track">
-          <iframe
-            width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
-            src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/foreverstillbeauty/almost&color=%23C8A96A&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false"
-            title="Almost — Forever Still Music">
-          </iframe>
+      <div class="player-card">
+
+        <!-- Sound Wave Visualization -->
+        <div class="sound-wave sound-wave--paused" id="soundWave" aria-hidden="true">
+          <!-- Bars generated by JS -->
         </div>
-        <div class="featured-track">
-          <iframe
-            width="100%" height="166" scrolling="no" frameborder="no" allow="autoplay"
-            src="https://w.soundcloud.com/player/?url=https%3A//soundcloud.com/foreverstillbeauty/sets/9pm-to-sold-out&color=%23C8A96A&auto_play=false&hide_related=true&show_comments=false&show_user=false&show_reposts=false&show_teaser=false"
-            title="9pm to Sold Out — Forever Still Music">
-          </iframe>
+
+        <!-- Track Info -->
+        <div class="player-info">
+          <span class="player-track-name" id="trackName">Almost</span>
+          <span class="player-artist-name">Forever Still Music</span>
         </div>
+
+        <!-- Playback Controls -->
+        <div class="player-controls">
+          <button class="play-btn" id="playBtn" aria-label="Play">
+            <svg id="playIcon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg">
+              <polygon points="4,1 14,8 4,15" />
+            </svg>
+            <svg id="pauseIcon" viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" style="display:none;">
+              <rect x="2" y="1" width="4" height="14" rx="1" />
+              <rect x="10" y="1" width="4" height="14" rx="1" />
+            </svg>
+          </button>
+          <div class="progress-wrap" id="progressWrap" role="slider" aria-label="Seek" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+            <div class="progress-fill" id="progressFill"></div>
+          </div>
+          <span class="time-display" id="timeDisplay">0:00 / 0:00</span>
+        </div>
+
+        <!-- Track List (rendered from tracks[] by JS) -->
+        <div class="track-list" id="trackList" style="max-height: 22rem; overflow-y: auto;"></div>
+
       </div>
     </section>
 
-    <!-- CTA -->
+    <!-- CTA (Music) -->
     <section class="cta-strip">
       <p class="cta-strip__heading">
         Built in the middle of real life.<br>
@@ -214,6 +547,19 @@
         <a href="https://www.foreverstillbeauty.com/almost.html" class="btn btn--ghost">Watch Almost</a>
         <a href="https://www.foreverstillbeauty.com/method.html" class="btn btn--ghost">Turn Your Story Into a Song</a>
       </div>
+    </section>
+
+    <!-- Studio CTA — Drives business to Forever Still Studio -->
+    <section class="studio-cta">
+      <span class="studio-cta__label">From Forever Still Studio</span>
+      <p class="studio-cta__heading">
+        This site? <em>Built from scratch.</em><br>
+        No template. No drag-and-drop.
+      </p>
+      <p class="studio-cta__body">
+        Forever Still Studio builds websites for small businesses that actually work — fast, found on Google, and built to sound like you. Not a corporation. You.
+      </p>
+      <a href="https://www.foreverstillstudio.com" class="studio-cta__link">See what we build &rarr;</a>
     </section>
 
     <!-- Streaming -->
@@ -240,5 +586,235 @@
     </footer>
 
   </div>
+
+  <!-- ═══════════════════════════════════════
+       AUDIO PLAYER ENGINE
+       ═══════════════════════════════════════ -->
+  <script>
+    (() => {
+      // ── Track Data ──
+      const tracks = [
+        { name: 'Almost', src: 'audio/almost.mp3' },
+        { name: 'After They Fall Asleep', src: 'audio/after-they-fall-asleep.mp3' },
+        { name: 'Almost Was Enough', src: 'audio/almost-was-enough.mp3' },
+        { name: 'Big Wheels and Big Dreams', src: 'audio/big-wheels-and-big-dreams.mp3' },
+        { name: 'Breadcrumbs Don\'t Fill Me Up', src: 'audio/breadcrumbs-dont-fill-me-up.mp3' },
+        { name: 'Breathing Again', src: 'audio/breathing-again.mp3' },
+        { name: 'Built in the Chaos', src: 'audio/built-in-the-chaos.mp3' },
+        { name: 'Built Quiet', src: 'audio/built-quiet.mp3' },
+        { name: 'Burn Between Us', src: 'audio/burn-between-us.mp3' },
+        { name: 'Good Kind of Trouble', src: 'audio/good-kind-of-trouble.mp3' },
+        { name: 'Grave Without a Stone', src: 'audio/grave-without-a-stone.mp3' },
+        { name: 'Guilt', src: 'audio/guilt.mp3' },
+        { name: 'Halfway Around the World', src: 'audio/halfway-around-the-world.mp3' },
+        { name: 'Harder Than the Army', src: 'audio/harder-than-the-army.mp3' },
+        { name: 'Home in the Night', src: 'audio/home-in-the-night.mp3' },
+        { name: 'I Can\'t Hear Myself Think', src: 'audio/i-cant-hear-myself-think.mp3' },
+        { name: 'I Didn\'t Break', src: 'audio/i-didnt-break.mp3' },
+        { name: 'I Hope They Understand', src: 'audio/i-hope-they-understand.mp3' },
+        { name: 'I Miss Me Too', src: 'audio/i-miss-me-too.mp3' },
+        { name: 'It Was Always You', src: 'audio/it-was-always-you.mp3' },
+        { name: 'Liam\'s Blanket', src: 'audio/liams-blanket.mp3' },
+        { name: 'My AI Bestie', src: 'audio/my-ai-bestie.mp3' },
+        { name: 'My Axtel Boy', src: 'audio/my-axtel-boy.mp3' },
+        { name: 'My Brave Boy', src: 'audio/my-brave-boy.mp3' },
+        { name: 'My Person', src: 'audio/my-person.mp3' },
+        { name: 'My Two Reasons', src: 'audio/my-two-reasons.mp3' },
+        { name: 'No One\'s Watching (Yet)', src: 'audio/no-ones-watching-yet.mp3' },
+        { name: 'Off the Market', src: 'audio/off-the-market.mp3' },
+        { name: 'Pig', src: 'audio/pig.mp3' },
+        { name: 'Say My Name', src: 'audio/say-my-name.mp3' },
+        { name: 'Soft Ghosts', src: 'audio/soft-ghosts.mp3' },
+        { name: 'South Carolina River', src: 'audio/south-carolina-river.mp3' },
+        { name: 'Still a Mom', src: 'audio/still-a-mom.mp3' },
+        { name: 'Still Standing', src: 'audio/still-standing.mp3' },
+        { name: 'The Bravest Me', src: 'audio/the-bravest-me.mp3' },
+        { name: 'The Muse', src: 'audio/the-muse.mp3' },
+        { name: 'The Weighted Walls', src: 'audio/the-weighted-walls.mp3' },
+        { name: 'Two Hour Dinner', src: 'audio/two-hour-dinner.mp3' },
+        { name: 'War Paint', src: 'audio/war-paint.mp3' },
+        { name: 'While You Were Playing', src: 'audio/while-you-were-playing.mp3' },
+        { name: 'Written in the Fire', src: 'audio/written-in-the-fire.mp3' },
+      ];
+
+      // ── Render Track List from tracks[] ──
+      (function renderTrackList() {
+        const list = document.getElementById('trackList');
+        list.innerHTML = tracks.map((t, i) =>
+          '<button class="track-item' + (i === 0 ? ' track-item--active' : '') + '" data-index="' + i + '" id="trackItem' + i + '">' +
+            '<span class="track-item__num">' + String(i + 1).padStart(2, '0') + '</span>' +
+            '<span class="track-item__name"></span>' +
+            '<span class="track-item__indicator"></span>' +
+            '<span class="track-item__duration" id="trackDuration' + i + '">—</span>' +
+          '</button>'
+        ).join('');
+        // set names via textContent so apostrophes/quotes in titles can't break markup
+        list.querySelectorAll('.track-item__name').forEach((el, i) => { el.textContent = tracks[i].name; });
+      })();
+
+      // ── State ──
+      let currentTrack = 0;
+      let isPlaying = false;
+      const audio = new Audio();
+      audio.preload = 'metadata';
+      audio.crossOrigin = 'anonymous';
+
+      // ── DOM ──
+      const soundWave    = document.getElementById('soundWave');
+      const playBtn      = document.getElementById('playBtn');
+      const playIcon      = document.getElementById('playIcon');
+      const pauseIcon     = document.getElementById('pauseIcon');
+      const progressWrap  = document.getElementById('progressWrap');
+      const progressFill  = document.getElementById('progressFill');
+      const timeDisplay   = document.getElementById('timeDisplay');
+      const trackNameEl   = document.getElementById('trackName');
+      const trackItems    = document.querySelectorAll('.track-item');
+
+      // ── Build Sound Wave Bars ──
+      const BAR_COUNT = 40;
+      for (let i = 0; i < BAR_COUNT; i++) {
+        const bar = document.createElement('div');
+        bar.className = 'sound-wave__bar';
+        // Randomize animation per bar
+        const maxH = Math.floor(Math.random() * 44) + 12;  // 12-56px
+        const minH = Math.floor(Math.random() * 6) + 3;    // 3-9px
+        const dur  = (Math.random() * 0.8 + 0.6).toFixed(2); // 0.6-1.4s
+        const del  = (Math.random() * -1.4).toFixed(2);       // staggered
+
+        bar.style.setProperty('--max-h', maxH + 'px');
+        bar.style.setProperty('--min-h', minH + 'px');
+        bar.style.setProperty('--duration', dur + 's');
+        bar.style.setProperty('--delay', del + 's');
+
+        soundWave.appendChild(bar);
+      }
+
+      // ── Load Track ──
+      function loadTrack(index) {
+        currentTrack = index;
+        audio.src = tracks[index].src;
+        trackNameEl.textContent = tracks[index].name;
+
+        // Highlight active track
+        trackItems.forEach((item, i) => {
+          item.classList.toggle('track-item--active', i === index);
+        });
+
+        // Reset progress
+        progressFill.style.width = '0%';
+        timeDisplay.textContent = '0:00 / 0:00';
+      }
+
+      // ── Play / Pause ──
+      function togglePlay() {
+        if (isPlaying) {
+          audio.pause();
+          setPaused();
+        } else {
+          audio.play().then(() => setPlaying()).catch(() => {
+            // Autoplay blocked or load error — user needs to interact again
+          });
+        }
+      }
+
+      function setPlaying() {
+        isPlaying = true;
+        playIcon.style.display = 'none';
+        pauseIcon.style.display = 'block';
+        soundWave.classList.remove('sound-wave--paused');
+        soundWave.classList.add('sound-wave--playing');
+        document.getElementById('trackItem' + currentTrack).classList.add('track-item--playing');
+        playBtn.setAttribute('aria-label', 'Pause');
+      }
+
+      function setPaused() {
+        isPlaying = false;
+        playIcon.style.display = 'block';
+        pauseIcon.style.display = 'none';
+        soundWave.classList.remove('sound-wave--playing');
+        soundWave.classList.add('sound-wave--paused');
+        trackItems.forEach(item => item.classList.remove('track-item--playing'));
+        playBtn.setAttribute('aria-label', 'Play');
+      }
+
+      // ── Progress Update ──
+      audio.addEventListener('timeupdate', () => {
+        if (!audio.duration) return;
+        const pct = (audio.currentTime / audio.duration) * 100;
+        progressFill.style.width = pct + '%';
+        timeDisplay.textContent = formatTime(audio.currentTime) + ' / ' + formatTime(audio.duration);
+        progressWrap.setAttribute('aria-valuenow', Math.round(pct));
+      });
+
+      // ── Duration Loaded ──
+      audio.addEventListener('loadedmetadata', () => {
+        const durEl = document.getElementById('trackDuration' + currentTrack);
+        if (durEl && audio.duration && isFinite(audio.duration)) {
+          durEl.textContent = formatTime(audio.duration);
+        }
+      });
+
+      // ── Track Ended ──
+      audio.addEventListener('ended', () => {
+        setPaused();
+        progressFill.style.width = '0%';
+        // Auto-advance to next track
+        if (currentTrack < tracks.length - 1) {
+          loadTrack(currentTrack + 1);
+          audio.play().then(() => setPlaying());
+        }
+      });
+
+      // ── Seek on Click ──
+      progressWrap.addEventListener('click', (e) => {
+        if (!audio.duration) return;
+        const rect = progressWrap.getBoundingClientRect();
+        const pct = (e.clientX - rect.left) / rect.width;
+        audio.currentTime = pct * audio.duration;
+      });
+
+      // ── Track List Click ──
+      trackItems.forEach((item) => {
+        item.addEventListener('click', () => {
+          const idx = parseInt(item.dataset.index);
+          if (idx === currentTrack && isPlaying) {
+            togglePlay();
+          } else if (idx === currentTrack && !isPlaying) {
+            togglePlay();
+          } else {
+            // Switch track
+            const wasPlaying = isPlaying;
+            if (isPlaying) { audio.pause(); setPaused(); }
+            loadTrack(idx);
+            if (wasPlaying) {
+              audio.play().then(() => setPlaying());
+            }
+          }
+        });
+      });
+
+      // ── Play Button ──
+      playBtn.addEventListener('click', togglePlay);
+
+      // ── Keyboard: Space to play/pause ──
+      document.addEventListener('keydown', (e) => {
+        if (e.code === 'Space' && e.target === document.body) {
+          e.preventDefault();
+          togglePlay();
+        }
+      });
+
+      // ── Format Time ──
+      function formatTime(sec) {
+        if (!sec || !isFinite(sec)) return '0:00';
+        const m = Math.floor(sec / 60);
+        const s = Math.floor(sec % 60);
+        return m + ':' + (s < 10 ? '0' : '') + s;
+      }
+
+      // ── Init ──
+      loadTrack(0);
+    })();
+  </script>
 </body>
 </html>
