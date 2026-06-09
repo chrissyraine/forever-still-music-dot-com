@@ -12,7 +12,7 @@
   <!-- Open Graph -->
   <meta property="og:title" content="Forever Still Music — Listen">
   <meta property="og:description" content="41 songs. 48K+ plays. No label, no ads.">
-  <meta property="og:image" content="https://www.foreverstillbeauty.com/images/album-cover.jpg">
+  <meta property="og:image" content="https://www.foreverstillmusic.com/hero-poster.jpg">
   <meta property="og:url" content="https://www.foreverstillmusic.com/">
   <meta property="og:type" content="music.album">
   <meta property="og:site_name" content="Forever Still Music">
@@ -21,7 +21,7 @@
   <meta name="twitter:card" content="summary_large_image">
   <meta name="twitter:title" content="Forever Still Music — Listen">
   <meta name="twitter:description" content="41 songs. 48K+ plays. No label, no ads.">
-  <meta name="twitter:image" content="https://www.foreverstillbeauty.com/images/album-cover.jpg">
+  <meta name="twitter:image" content="https://www.foreverstillmusic.com/hero-poster.jpg">
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -449,6 +449,7 @@
   </style>
 </head>
 <body>
+  <canvas id="sparkleCanvas" aria-hidden="true" style="position:fixed;inset:0;z-index:9999;pointer-events:none;width:100%;height:100%;"></canvas>
   <div class="container">
 
     <!-- Nav -->
@@ -459,7 +460,7 @@
 
     <!-- Hero -->
     <header class="hero">
-      <video class="hero__bg-video" src="hero.mp4" autoplay muted playsinline aria-hidden="true"></video>
+      <video class="hero__bg-video" src="hero.mp4" poster="hero-poster.jpg" autoplay muted playsinline aria-hidden="true"></video>
       <span class="hero__eyebrow">Chrissy Schroer &nbsp;·&nbsp; Independent Artist</span>
       <span class="hero__title">Listen</span>
       <div class="hero__stats">
@@ -819,6 +820,69 @@
       // ── Init ──
       loadTrack(0);
     })();
+  </script>
+  <!-- Gold cursor sparkle trail -->
+  <script>
+  (function () {
+    var canvas = document.getElementById('sparkleCanvas');
+    if (!canvas) return;
+    if (window.matchMedia('(max-width: 768px)').matches) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    var ctx = canvas.getContext('2d');
+    var sparkles = [];
+    var lastX = 0, lastY = 0;
+    var MIN_DIST = 8;
+    var GOLD = { r: 200, g: 169, b: 106 };
+    function resize() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
+    resize();
+    window.addEventListener('resize', resize);
+    function drawSparkle(x, y, size, alpha, rotation) {
+      ctx.save();
+      ctx.translate(x, y);
+      ctx.rotate(rotation);
+      ctx.globalAlpha = alpha;
+      ctx.fillStyle = 'rgb(' + GOLD.r + ',' + GOLD.g + ',' + GOLD.b + ')';
+      var outer = size, inner = size * 0.35;
+      ctx.beginPath(); ctx.moveTo(0,-outer); ctx.lineTo(inner,-inner); ctx.lineTo(0,0); ctx.lineTo(-inner,-inner); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(inner,inner); ctx.lineTo(0,outer); ctx.lineTo(-inner,inner); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(-outer,0); ctx.lineTo(-inner,inner); ctx.lineTo(0,0); ctx.lineTo(-inner,-inner); ctx.closePath(); ctx.fill();
+      ctx.beginPath(); ctx.moveTo(0,0); ctx.lineTo(inner,inner); ctx.lineTo(outer,0); ctx.lineTo(inner,-inner); ctx.closePath(); ctx.fill();
+      ctx.restore();
+    }
+    document.addEventListener('mousemove', function (e) {
+      var dx = e.clientX - lastX, dy = e.clientY - lastY;
+      var dist = Math.sqrt(dx*dx + dy*dy);
+      if (dist > MIN_DIST) {
+        var count = dist > 30 ? 2 : 1;
+        for (var i = 0; i < count; i++) {
+          sparkles.push({
+            x: e.clientX + (Math.random()-0.5)*10,
+            y: e.clientY + (Math.random()-0.5)*10,
+            size: 3 + Math.random()*5,
+            alpha: 0.7 + Math.random()*0.3,
+            rotation: Math.random()*Math.PI,
+            driftX: (Math.random()-0.5)*0.6,
+            driftY: -0.3 - Math.random()*0.5,
+            fadeRate: 0.015 + Math.random()*0.01,
+            spin: (Math.random()-0.5)*0.04
+          });
+        }
+      }
+      lastX = e.clientX; lastY = e.clientY;
+    });
+    function animate() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      for (var i = sparkles.length - 1; i >= 0; i--) {
+        var s = sparkles[i];
+        s.alpha -= s.fadeRate; s.x += s.driftX; s.y += s.driftY;
+        s.rotation += s.spin; s.size *= 0.98;
+        if (s.alpha <= 0 || s.size < 0.5) { sparkles.splice(i, 1); continue; }
+        drawSparkle(s.x, s.y, s.size, s.alpha, s.rotation);
+      }
+      requestAnimationFrame(animate);
+    }
+    animate();
+  })();
   </script>
 </body>
 </html>
