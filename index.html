@@ -69,7 +69,7 @@
     .nav__link:hover { color: var(--gold); border-color: var(--gold); }
 
     /* ── Hero ── */
-    .hero { padding: 60px 24px 56px; text-align: center; border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule); margin-bottom: 64px; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 58vh; }
+    .hero { padding: 60px 24px 56px; text-align: center; border-bottom: 1px solid var(--rule); margin-bottom: 64px; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 100vh; width: 100vw; margin-left: calc(50% - 50vw); margin-right: calc(50% - 50vw); }
     .hero__bg-video { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; z-index: 0; }
     .hero::before { content: ''; position: absolute; inset: 0; z-index: 1; background: radial-gradient(ellipse at 50% 0%, rgba(200,169,106,0.07) 0%, transparent 65%); pointer-events: none; }
     .hero::after { content: ''; position: absolute; inset: 0; z-index: 1; background: linear-gradient(to bottom, rgba(18,10,15,0.45) 0%, rgba(18,10,15,0.62) 100%); pointer-events: none; }
