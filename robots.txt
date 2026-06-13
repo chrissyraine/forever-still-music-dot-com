@@ -17,3 +17,5 @@ User-agent: Claude-SearchBot
 Allow: /
 User-agent: Google-Extended
 Allow: /
+
+Sitemap: https://www.foreverstillmusic.com/sitemap.xml
